@@ -1,6 +1,5 @@
 // Assignment code here
 /* jshint esversion: 6 */
-
 var getLength = function() { // get a length (number between 8 and 128) from the user via window.prompt()
   var length = 0;
   while(!length) { // the length is only set in the loop when it's been validated, don't need to check for anything except not zero here.
@@ -22,23 +21,72 @@ var getLength = function() { // get a length (number between 8 and 128) from the
   return length;
 };
 
+var getPwdChars = function(charset) { // generate a string of possible password characters based on user input
+  const CHARSET = { // the character categories
+    lower: 'abcdefghijklmnopqrstuvwxyz',
+    numeric: '1234567890',
+    special: '~`-=!@#$%^&*()_+[]\\{}|;\'",./<>?' 
+  };
+  CHARSET.upper = CHARSET.lower.toUpperCase(); // TODO: ask someone why I can't put "upper: this.lower.toUpperCase()" in the object definition
+  var seen = {};
+  var promptStr = 'What types of characters should be used? Enter one or more of the following (not case sensitive), separated by spaces: '; 
+  for(var key in CHARSET) {
+    seen[key] = false;
+    promptStr += `"${key}", `;
+  }
+  var chars = '';
+  while(chars.length == 0) {
+    promptCharTypes = window.prompt(promptStr);
+    if(promptCharTypes == null) { // abort if cancel is clicked
+      return null;
+    }
+    charTypes = promptCharTypes.replace(/\s+/g, ' ').trim().toLowerCase(); // trim out extra spaces and spaces at beginning/end of string
+    charTypes = charTypes.split(' ');
+    for(var charType of charTypes) {
+      if(!(charType in CHARSET)) {
+        console.log(`skipping unknown character type: "${charType}"`);
+        continue;
+      }
+      if(seen[charType]) {
+        console.log(`skipping duplicate character type: "${charType}"`);
+        continue;
+      }
+      chars += CHARSET[charType];
+      seen[charType] = true;
+    }
+    if(chars.length == 0) {
+      window.alert('No valid character types specified: please try again.');
+    }
+  }
+  return chars;
+};
 
 var generatePassword = function() {
   // get/santize length from user (min:8, max: 128)
   length = getLength();
   if(!length) { // user clicked the cancel button on the input
-    return '(password generation cancelled by user request)';
+    return '(password generation cancelled by user request)'; // the writePassword() function further down in the read-only part of this exercise just blindly
+                                                              // applies whatever this function returns, so at least this way it doesn't look like an error
+                                                              // when the user clicks cancel on the pop-up
   }
   console.log(`Chosen length is ${length} characters.`);
   // get/santize character set choice from user (some combination of uppercase, lowercase, numeric, and special characters)
   // build a string of all possible password characters from character set choice
-  //pwdChars = getPwdChars();
-  //if(!pwdChars) { // user clicked the cancel button on the input
-  //  return '(password generation cancelled by user request)';
-  //}
+  pwdChars = getPwdChars();
+  if(!pwdChars) { // user clicked the cancel button on the input
+    return '(password generation cancelled by user request)'; // I'd likely at least return false here and make writePassword() responsible for explaining to
+                                                              // the user nothing happened because cancel was clicked, but this is better than just endlessly
+                                                              // looping until the user clicks "OK" or closes their browser window.
+  }
   console.log(`Possible password characters: "${pwdChars}"`);
   // randomly pick characters from possible characters string until it's the chosen length
   // return generated password
+  var randomPassword = '';
+  for(var i = 0; i < length; i++) {
+    randomPassword += pwdChars[Math.floor(Math.random() * pwdChars.length)];
+  }
+  console.log(`Generated password: "${randomPassword}"`)
+  return randomPassword;
 };
 
 // Get references to the #generate element
