@@ -27,9 +27,10 @@ var getPwdChars = function() { // generate a string of possible password charact
     numeric: '1234567890',
     special: '~`-=!@#$%^&*()_+[]\\{}|;\'",./<>?' 
   };
-  CHARSET.upper = CHARSET.lower.toUpperCase(); // TODO: ask someone why I can't put "upper: this.lower.toUpperCase()" in the object definition
+  CHARSET.upper = CHARSET.lower.toUpperCase();
   var seen = {};
-  var promptStr = 'What types of characters should be used? Enter one or more of the following (not case sensitive), separated by spaces: '; 
+  var promptStr = 'What kinds of characters should be used? Enter one or more of the following (not case sensitive),';
+  prompStr += ' separated by spaces: '; 
   for(var key in CHARSET) {
     seen[key] = false;
     promptStr += `"${key}", `;
@@ -40,7 +41,7 @@ var getPwdChars = function() { // generate a string of possible password charact
     if(promptCharTypes == null) { // abort if cancel is clicked
       return null;
     }
-    charTypes = promptCharTypes.replace(/\s+/g, ' ').trim().toLowerCase(); // trim out extra spaces and spaces at beginning/end of string, lowercase-ify
+    charTypes = promptCharTypes.replace(/\s+/g, ' ').trim().toLowerCase(); // trim spaces, lowercase-ify
     charTypes = charTypes.split(' ');
     for(var charType of charTypes) {
       if(!(charType in CHARSET)) {
@@ -65,17 +66,19 @@ var generatePassword = function() {
   // get/santize length from user (min:8, max: 128)
   length = getLength();
   if(!length) { // user clicked the cancel button on the input
-    return '(password generation cancelled by user request)'; // the writePassword() function further down in the read-only part of this exercise just blindly
-                                                              // applies whatever this function returns, so at least this way it doesn't look like an error
-                                                              // when the user clicks cancel on the pop-up
+    return '(password generation cancelled by user request)'; /* the writePassword() function further down in the read-only part of this 
+                                                                 exercise just blindly applies whatever this function returns, so at least 
+                                                                 this way it doesn't look like an error when the user clicks cancel on the
+                                                                 pop-up */
   }
   // get/santize character set choice from user (some combination of uppercase, lowercase, numeric, and special characters)
   // build a string of all possible password characters from character set choice
   pwdChars = getPwdChars();
   if(!pwdChars) { // user clicked the cancel button on the input
-    return '(password generation cancelled by user request)'; // I'd likely at least return false here and make writePassword() responsible for explaining to
-                                                              // the user nothing happened because cancel was clicked, but this is better than endlessly looping
-                                                              // looping until the user clicks "OK" or closes their browser window.
+    return '(password generation cancelled by user request)'; /* I'd likely at least return false here and make writePassword() responsible
+                                                                 for explaining to the user nothing happened because cancel was clicked, 
+                                                                 but this is better than endlessly looping looping until the user clicks 
+                                                                 "OK" or closes their browser window. */
   }
   // randomly pick characters from possible characters string until it's the chosen length
   // return generated password
