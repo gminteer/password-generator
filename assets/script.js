@@ -1,8 +1,8 @@
 // Assignment code here
 /* jshint esversion: 6 */
-var getLength = function() { // get a length (number between 8 and 128) from the user via window.prompt()
-  var length = 0;
-  while(!length) { // the length is only set in the loop when it's been validated, don't need to check for anything except not zero here.
+var getLength = function() { // get a length (number between 8 and 128)
+  var length;
+  while(!length) {
     promptLength = window.prompt('How long should the password be? Enter a number between 8 and 128.');
     if(promptLength == null) { // abort if cancel is clicked
       return null;
@@ -28,20 +28,21 @@ var getPwdChars = function() { // generate a string of possible password charact
     special: '~`-=!@#$%^&*()_+[]\\{}|;\'",./<>?' 
   };
   CHARSET.upper = CHARSET.lower.toUpperCase();
-  var seen = {};
+  var seen = {}; // building prompt text and a hashmap of what keys have already been seen at the same time so we only loop once
   var promptStr = 'What kinds of characters should be used? Enter one or more of the following (not case sensitive),';
-  prompStr += ' separated by spaces: '; 
+  promptStr += ' separated by spaces: '; 
   for(var key in CHARSET) {
     seen[key] = false;
     promptStr += `"${key}", `;
   }
   var chars = '';
+  var outStr = 'Selected character types: ';
   while(chars.length == 0) {
     promptCharTypes = window.prompt(promptStr);
     if(promptCharTypes == null) { // abort if cancel is clicked
       return null;
     }
-    charTypes = promptCharTypes.replace(/\s+/g, ' ').trim().toLowerCase(); // trim spaces, lowercase-ify
+    charTypes = promptCharTypes.replace(/\s+/g, ' ').trim().toLowerCase(); // trim spaces, convert to lowercase
     charTypes = charTypes.split(' ');
     for(var charType of charTypes) {
       if(!(charType in CHARSET)) {
@@ -54,9 +55,12 @@ var getPwdChars = function() { // generate a string of possible password charact
       }
       chars += CHARSET[charType];
       seen[charType] = true;
+      outStr += `"${charType}" `;
     }
     if(chars.length == 0) {
       window.alert('No valid character types specified: please try again.');
+    } else {
+      window.alert(outStr);
     }
   }
   return chars;
@@ -66,19 +70,13 @@ var generatePassword = function() {
   // get/santize length from user (min:8, max: 128)
   length = getLength();
   if(!length) { // user clicked the cancel button on the input
-    return '(password generation cancelled by user request)'; /* the writePassword() function further down in the read-only part of this 
-                                                                 exercise just blindly applies whatever this function returns, so at least 
-                                                                 this way it doesn't look like an error when the user clicks cancel on the
-                                                                 pop-up */
+    return null; 
   }
   // get/santize character set choice from user (some combination of uppercase, lowercase, numeric, and special characters)
   // build a string of all possible password characters from character set choice
   pwdChars = getPwdChars();
   if(!pwdChars) { // user clicked the cancel button on the input
-    return '(password generation cancelled by user request)'; /* I'd likely at least return false here and make writePassword() responsible
-                                                                 for explaining to the user nothing happened because cancel was clicked, 
-                                                                 but this is better than endlessly looping looping until the user clicks 
-                                                                 "OK" or closes their browser window. */
+    return null;
   }
   // randomly pick characters from possible characters string until it's the chosen length
   // return generated password
