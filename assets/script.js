@@ -68,13 +68,13 @@ var getPwdChars = function() { // generate a string of possible password charact
 
 var generatePassword = function() {
   // get/santize length from user (min:8, max: 128)
-  length = getLength();
+  var length = getLength();
   if(!length) { // user clicked the cancel button on the input
     return null; 
   }
   // get/santize character set choice from user (some combination of uppercase, lowercase, numeric, and special characters)
   // build a string of all possible password characters from character set choice
-  pwdChars = getPwdChars();
+  var pwdChars = getPwdChars();
   if(!pwdChars) { // user clicked the cancel button on the input
     return null;
   }
